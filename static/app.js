@@ -3,15 +3,15 @@ let currentChart = "yoy_overlay";
 let selectedYears = ALL_YEARS.map(Number);
 
 const CHART_META = {
-  yoy_overlay:      { num:"1", label:"Day-of-year overlay",       desc:"All years overlaid on a single day-of-year axis to reveal seasonal patterns", part:1 },
-  monthly_avg:      { num:"2", label:"Monthly averages",          desc:"Average price per month grouped by year — spot seasonal highs and lows", part:1 },
-  heatmap:          { num:"3", label:"Month × Year heatmap",      desc:"Average price colour-coded by month and year for quick pattern scanning", part:1 },
-  dow:              { num:"4", label:"Day-of-week pattern",       desc:"Average price for each day of the week — weekend vs weekday dynamics", part:1 },
-  outlier_timeline: { num:"5", label:"Timeline with outliers",    desc:"Full price timeline with confirmed outliers highlighted in red", part:2 },
-  zscore:           { num:"6", label:"Z-score over time",         desc:"Global z-score per day — points above the dashed line are anomalous", part:2 },
-  histogram:        { num:"7", label:"Price distribution",        desc:"Distribution of prices with IQR fences marking the outlier boundaries", part:2 },
-  boxplot:          { num:"8", label:"Box-plots by year",         desc:"Box-and-whisker summary per year — outliers appear as individual dots", part:2 },
-  forecast:         { num:"9", label:"Feb 2022 forecast",         desc:"Historical prices + extrapolated Feb 2022 forecast using trend + seasonal index", part:3 },
+  yoy_overlay:      { num:"1", label:"Day-of-year overlay",       desc:"Each year's daily prices plotted on the same 1–365 axis so you can directly compare how prices moved through the year across different years — peaks and dips at the same day line up for easy comparison.", part:1 },
+  monthly_avg:      { num:"2", label:"Monthly averages",          desc:"Average price for each month grouped by year shown as bars side by side. Taller bars mean higher average prices that month — useful for spotting which months are consistently expensive or cheap.", part:1 },
+  heatmap:          { num:"3", label:"Month × Year heatmap",      desc:"A grid where each cell is a month–year combination, colour-coded from cool (cheap) to warm (expensive). Darker red cells are the most expensive month–year combinations at a glance.", part:1 },
+  dow:              { num:"4", label:"Day-of-week pattern",       desc:"Average price for each day of the week (Mon–Sun) shown as lines per year. Peaks indicate which days hotels are most expensive — helps identify weekend vs weekday pricing patterns.", part:1 },
+  outlier_timeline: { num:"5", label:"Timeline with outliers",    desc:"Daily prices plotted over time — normal days shown as a blue line, confirmed outlier days shown as red dots. A red dot means that day's price was flagged as abnormal by at least 2 of the 3 detection methods.", part:2 },
+  zscore:           { num:"6", label:"Z-score over time",         desc:"How far each day's price deviates from the overall mean, measured in standard deviations. The dashed red line is the 2.5 threshold — any point above it is statistically unusual and marked as an outlier.", part:2 },
+  histogram:        { num:"7", label:"Price distribution",        desc:"Frequency distribution of all prices split into normal (blue) and outlier (red) bars. The two dashed orange lines are the IQR fences — prices outside these boundaries are considered outliers by the IQR method.", part:2 },
+  boxplot:          { num:"8", label:"Box-plots by year",         desc:"Yearly price spread shown as box-and-whisker plots. The box covers the middle 50% of prices, the line inside is the median, and dots outside the whiskers are individual outlier days for that year.", part:2 },
+  forecast:         { num:"9", label:"Feb 2022 forecast",         desc:"Predicts daily hotel prices for February 2022 by combining two signals: a long-term price trend (rising or falling each year) and a seasonal index (how prices typically move day-by-day through the year). The orange line is the forecast, the shaded band is a ±$8 uncertainty range.", part:3 },
 };
 
 const OUTLIER_CHARTS = new Set(["outlier_timeline","zscore","histogram","boxplot"]);
