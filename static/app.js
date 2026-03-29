@@ -198,7 +198,7 @@ async function loadChart() {
     Plotly.react("plotly-chart", fig.data, layout, {
       responsive: true,
       displayModeBar: true,
-      modeBarButtonsToRemove: ["autoScale2d","lasso2d","select2d"],
+      modeBarButtonsToRemove: ["autoScale2d","lasso2d","select2d","pan2d","zoom2d"],
       displaylogo: false,
     });
 
