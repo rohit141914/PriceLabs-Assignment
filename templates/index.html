@@ -26,14 +26,34 @@
     <aside>
 
       <!-- Year multiselect -->
-      <div>
+      <div class="year-select-wrap">
         <div class="section-label">Filter by Year</div>
-        <div class="year-grid" id="yearGrid">
-          {% for yr in years %}
-          <div class="year-chip selected" data-year="{{ yr }}" onclick="toggleYear(this)">{{ yr }}</div>
-          {% endfor %}
+
+        <button class="year-trigger" id="yearTrigger" onclick="toggleYearDropdown(event)">
+          <span class="year-trigger-label" id="yearTriggerLabel">All years</span>
+          <span class="year-trigger-arrow">&#9660;</span>
+        </button>
+
+        <div class="year-dropdown" id="yearDropdown">
+          <div class="year-search-wrap">
+            <input class="year-search" id="yearSearch" type="text" placeholder="Search year…"
+                   oninput="filterYearOptions(this.value)" autocomplete="off" />
+          </div>
+          <div class="year-dropdown-actions">
+            <button class="year-action-link" onclick="selectAllYears()">Select all</button>
+            <span class="year-action-sep">·</span>
+            <button class="year-action-link" onclick="deselectAllYears()">Deselect all</button>
+          </div>
+          <div class="year-option-list" id="yearOptionList">
+            {% for yr in years %}
+            <label class="year-option" data-year="{{ yr }}">
+              <input type="checkbox" class="year-checkbox" data-year="{{ yr }}" checked
+                     onchange="handleYearCheckbox(this)" />
+              <span class="year-option-text">{{ yr }}</span>
+            </label>
+            {% endfor %}
+          </div>
         </div>
-        <button class="select-all-btn" onclick="selectAllYears()">Select / Deselect All</button>
       </div>
 
       <!-- Chart selector -->

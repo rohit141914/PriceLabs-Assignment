@@ -146,44 +146,155 @@ aside {
   transition: background 0.15s;
 }
 
-/* ── Year multiselect ── */
-.year-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+/* ── Year multiselect dropdown ── */
+.year-select-wrap { position: relative; }
 
-.year-chip {
-  display: flex; align-items: center; justify-content: center;
-  padding: 7px 0;
-  border-radius: 8px;
+.year-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: var(--radius);
   border: 1px solid var(--border2);
   background: var(--surface2);
-  color: var(--muted);
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
   cursor: pointer;
-  transition: all 0.15s;
-  user-select: none;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: left;
 }
-.year-chip:hover { border-color: var(--accent); color: var(--text); }
-.year-chip.selected {
-  border-color: var(--accent);
-  background: rgba(78,121,167,0.22);
-  color: #a8c8e8;
-  font-weight: 500;
-}
+.year-trigger:hover { border-color: var(--accent); background: rgba(78,121,167,0.08); }
+.year-trigger.open  { border-color: var(--accent); background: rgba(78,121,167,0.12); }
 
-.select-all-btn {
-  width: 100%;
-  padding: 7px;
-  border-radius: 8px;
-  border: 1px dashed var(--border2);
-  background: transparent;
+.year-trigger-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 20px);
+  font-size: 13px;
+}
+.year-trigger-arrow {
+  font-size: 9px;
   color: var(--muted);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.year-trigger.open .year-trigger-arrow { transform: rotate(180deg); }
+
+.year-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  z-index: 200;
+  overflow: hidden;
+}
+.year-dropdown.open { display: block; }
+
+.year-search-wrap {
+  padding: 8px 8px 4px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.year-search {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text);
   font-family: 'DM Sans', sans-serif;
   font-size: 12px;
-  cursor: pointer;
-  margin-top: 4px;
-  transition: all 0.15s;
+  outline: none;
+  transition: border-color 0.15s;
 }
-.select-all-btn:hover { color: var(--text); border-color: var(--text); }
+.year-search::placeholder { color: var(--muted); }
+.year-search:focus { border-color: var(--accent); }
+
+.year-dropdown-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.year-action-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.year-action-link:hover { color: var(--text); }
+.year-action-sep { color: var(--muted); font-size: 11px; }
+
+.year-option-list {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+.year-option-list::-webkit-scrollbar { width: 4px; }
+.year-option-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.year-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+  user-select: none;
+}
+.year-option:hover { background: var(--surface2); }
+.year-option.hidden { display: none; }
+
+.year-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--border2);
+  border-radius: 4px;
+  background: var(--surface2);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: border-color 0.15s, background 0.15s;
+}
+.year-checkbox:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.year-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px; top: 1px;
+  width: 5px; height: 8px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+.year-checkbox:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.year-option-text {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+}
+.year-option.deselected .year-option-text { color: var(--muted); }
 
 /* ── Main content ── */
 .content { display: flex; flex-direction: column; overflow: hidden; }

@@ -16,30 +16,96 @@ const CHART_META = {
 
 const OUTLIER_CHARTS = new Set(["outlier_timeline","zscore","histogram","boxplot"]);
 
-// ── Year selection ────────────────────────────────────────────────────────────
-function toggleYear(el) {
-  const yr = Number(el.dataset.year);
-  if (el.classList.contains("selected")) {
-    if (selectedYears.length === 1) return; // keep at least 1
-    selectedYears = selectedYears.filter(y => y !== yr);
-    el.classList.remove("selected");
+// ── Year dropdown ─────────────────────────────────────────────────────────────
+
+function updateTriggerLabel() {
+  const label = document.getElementById("yearTriggerLabel");
+  const all   = ALL_YEARS.map(Number);
+  if (selectedYears.length === 0) { label.textContent = "None selected"; return; }
+  if (selectedYears.length === all.length) { label.textContent = "All years"; return; }
+  const sorted = [...selectedYears].sort((a, b) => a - b);
+  label.textContent = sorted.length <= 3
+    ? sorted.join(", ")
+    : sorted.slice(0, 3).join(", ") + ` + ${sorted.length - 3} more`;
+}
+
+function updateCheckboxDisabledState() {
+  document.querySelectorAll(".year-checkbox").forEach(cb => {
+    const yr = Number(cb.dataset.year);
+    cb.disabled = selectedYears.length === 1 && selectedYears.includes(yr);
+  });
+}
+
+function toggleYearDropdown(event) {
+  event.stopPropagation();
+  const trigger  = document.getElementById("yearTrigger");
+  const dropdown = document.getElementById("yearDropdown");
+  if (dropdown.classList.contains("open")) {
+    closeYearDropdown();
   } else {
-    selectedYears.push(yr);
-    selectedYears.sort();
-    el.classList.add("selected");
+    trigger.classList.add("open");
+    dropdown.classList.add("open");
+    const search = document.getElementById("yearSearch");
+    search.value = "";
+    filterYearOptions("");
+    search.focus();
   }
+}
+
+function closeYearDropdown() {
+  document.getElementById("yearTrigger").classList.remove("open");
+  document.getElementById("yearDropdown").classList.remove("open");
+}
+
+function handleYearCheckbox(cb) {
+  const yr = Number(cb.dataset.year);
+  if (cb.checked) {
+    if (!selectedYears.includes(yr)) { selectedYears.push(yr); selectedYears.sort((a,b) => a-b); }
+  } else {
+    if (selectedYears.length === 1) { cb.checked = true; return; }
+    selectedYears = selectedYears.filter(y => y !== yr);
+  }
+  cb.closest(".year-option").classList.toggle("deselected", !cb.checked);
+  updateCheckboxDisabledState();
+  updateTriggerLabel();
   refresh();
 }
 
 function selectAllYears() {
-  const all = ALL_YEARS.map(Number);
-  const allSelected = selectedYears.length === all.length;
-  selectedYears = allSelected ? [all[0]] : all;
-  document.querySelectorAll(".year-chip").forEach(el => {
-    el.classList.toggle("selected", selectedYears.includes(Number(el.dataset.year)));
+  selectedYears = ALL_YEARS.map(Number);
+  document.querySelectorAll(".year-checkbox").forEach(cb => {
+    cb.checked = true;
+    cb.closest(".year-option").classList.remove("deselected");
   });
+  updateCheckboxDisabledState();
+  updateTriggerLabel();
   refresh();
 }
+
+function deselectAllYears() {
+  const first = ALL_YEARS.map(Number)[0];
+  selectedYears = [first];
+  document.querySelectorAll(".year-checkbox").forEach(cb => {
+    const yr = Number(cb.dataset.year);
+    cb.checked = yr === first;
+    cb.closest(".year-option").classList.toggle("deselected", yr !== first);
+  });
+  updateCheckboxDisabledState();
+  updateTriggerLabel();
+  refresh();
+}
+
+function filterYearOptions(query) {
+  const q = query.trim().toLowerCase();
+  document.querySelectorAll(".year-option").forEach(row => {
+    row.classList.toggle("hidden", q !== "" && !row.dataset.year.includes(q));
+  });
+}
+
+document.addEventListener("click", function(e) {
+  const wrap = document.querySelector(".year-select-wrap");
+  if (wrap && !wrap.contains(e.target)) closeYearDropdown();
+});
 
 // ── Chart selection ───────────────────────────────────────────────────────────
 function selectChart(btn) {
@@ -123,5 +189,9 @@ function refresh() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-window.addEventListener("load", refresh);
+window.addEventListener("load", () => {
+  updateTriggerLabel();
+  updateCheckboxDisabledState();
+  refresh();
+});
 window.addEventListener("resize", () => Plotly.Plots.resize("plotly-chart"));
