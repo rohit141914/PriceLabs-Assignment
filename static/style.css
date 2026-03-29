@@ -498,7 +498,7 @@ table.outlier-tbl tr:hover td { background: var(--surface2); }
   font-size: 14px;
   color: var(--muted);
 }
-.info-pill strong { color: var(--text); font-family: 'DM Mono', monospace; }
+.pill-val { color: var(--text); font-family: 'DM Mono', monospace; }
 
 /* ── Empty state ── */
 .empty {
