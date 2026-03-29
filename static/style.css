@@ -23,7 +23,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.6;
   min-height: 100vh;
 }
@@ -69,7 +69,7 @@ header {
   border: 1px solid rgba(78,121,167,0.3);
   padding: 3px 10px;
   border-radius: 20px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.03em;
 }
@@ -92,7 +92,7 @@ aside {
 }
 
 .section-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -104,7 +104,7 @@ aside {
 .chart-group { display: flex; flex-direction: column; gap: 4px; }
 
 .group-title {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--muted);
   letter-spacing: 0.08em;
@@ -125,7 +125,7 @@ aside {
 .accordion-title:hover { color: var(--text); }
 
 .accordion-arrow {
-  font-size: 8px;
+  font-size: 10px;
   transition: transform 0.2s;
   flex-shrink: 0;
 }
@@ -152,7 +152,7 @@ aside {
   background: transparent;
   color: var(--muted);
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.15s;
   text-align: left;
@@ -188,7 +188,7 @@ aside {
   background: var(--surface2);
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
   text-align: left;
@@ -201,7 +201,7 @@ aside {
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: calc(100% - 20px);
-  font-size: 13px;
+  font-size: 14px;
 }
 .year-trigger-arrow {
   font-size: 9px;
@@ -238,7 +238,7 @@ aside {
   background: var(--surface2);
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   outline: none;
   transition: border-color 0.15s;
 }
@@ -257,14 +257,14 @@ aside {
   border: none;
   color: var(--accent);
   font-family: 'DM Sans', sans-serif;
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 .year-action-link:hover { color: var(--text); }
-.year-action-sep { color: var(--muted); font-size: 11px; }
+.year-action-sep { color: var(--muted); font-size: 13px; }
 
 .year-option-list {
   max-height: 220px;
@@ -319,7 +319,7 @@ aside {
 
 .year-option-text {
   font-family: 'DM Mono', monospace;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text);
 }
 .year-option.deselected .year-option-text { color: var(--muted); }
@@ -343,14 +343,14 @@ aside {
   padding: 14px 16px;
 }
 .metric-label {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   margin-bottom: 4px;
 }
 .metric-val {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 600;
   font-family: 'DM Mono', monospace;
   letter-spacing: -0.02em;
@@ -379,7 +379,7 @@ aside {
   font-weight: 500;
 }
 .chart-subtitle {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 
@@ -403,12 +403,12 @@ aside {
   background: rgba(78,121,167,0.25);
   border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--accent);
 }
 
-.chart-card-title { font-weight: 500; font-size: 13px; }
+.chart-card-title { font-weight: 500; font-size: 16px; }
 
 .chart-body { padding: 8px; }
 
@@ -451,14 +451,14 @@ aside {
 table.outlier-tbl {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 14px;
 }
 table.outlier-tbl th {
   text-align: left;
   padding: 10px 16px;
   color: var(--muted);
   font-weight: 500;
-  font-size: 11px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 1px solid var(--border);
@@ -476,7 +476,7 @@ table.outlier-tbl tr:hover td { background: var(--surface2); }
   display: inline-flex; align-items: center;
   padding: 2px 8px;
   border-radius: 20px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.05em;
   font-family: 'DM Sans', sans-serif;
@@ -495,7 +495,7 @@ table.outlier-tbl tr:hover td { background: var(--surface2); }
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px 14px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 .info-pill strong { color: var(--text); font-family: 'DM Mono', monospace; }
@@ -505,7 +505,7 @@ table.outlier-tbl tr:hover td { background: var(--surface2); }
   display: flex; align-items: center; justify-content: center;
   height: 300px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 15px;
   flex-direction: column;
   gap: 8px;
 }

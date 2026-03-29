@@ -42,7 +42,7 @@ YEAR_COLORS = {
 PLOTLY_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="DM Sans, sans-serif", color="#e2e8f0", size=12),
+    font=dict(family="DM Sans, sans-serif", color="#e2e8f0", size=14),
     margin=dict(l=50, r=30, t=40, b=50),
     legend=dict(
         bgcolor="rgba(255,255,255,0.05)",
@@ -54,7 +54,7 @@ PLOTLY_LAYOUT = dict(
     hoverlabel=dict(
         bgcolor="#1e2530",
         bordercolor="rgba(255,255,255,0.15)",
-        font=dict(family="DM Sans, sans-serif", color="#e2e8f0", size=13),
+        font=dict(family="DM Sans, sans-serif", color="#e2e8f0", size=14),
         namelength=-1,
         align="left",
     ),
