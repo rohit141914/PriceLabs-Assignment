@@ -49,8 +49,8 @@ PLOTLY_LAYOUT = dict(
         bordercolor="rgba(255,255,255,0.1)",
         borderwidth=1,
     ),
-    xaxis=dict(gridcolor="rgba(255,255,255,0.07)", showline=False, zeroline=False),
-    yaxis=dict(gridcolor="rgba(255,255,255,0.07)", showline=False, zeroline=False),
+    xaxis=dict(gridcolor="rgba(255,255,255,0.07)", showline=True, linecolor="rgba(255,255,255,0.25)", linewidth=1, zeroline=False),
+    yaxis=dict(gridcolor="rgba(255,255,255,0.07)", showline=True, linecolor="rgba(255,255,255,0.25)", linewidth=1, zeroline=False),
     hoverlabel=dict(
         bgcolor="#1e2530",
         bordercolor="rgba(255,255,255,0.15)",
@@ -321,8 +321,8 @@ def build_forecast(years: List[int]) -> go.Figure:
     fig.update_layout(**PLOTLY_LAYOUT,
         title=f"Feb 2022 Forecast  (trend slope: {slope:+.2f} USD/yr)",
         hovermode="x unified")
-    fig.update_xaxes(gridcolor="rgba(255,255,255,0.07)", showline=False, zeroline=False)
-    fig.update_yaxes(gridcolor="rgba(255,255,255,0.07)", showline=False, zeroline=False,
+    fig.update_xaxes(gridcolor="rgba(255,255,255,0.07)", showline=True, linecolor="rgba(255,255,255,0.25)", linewidth=1, zeroline=False)
+    fig.update_yaxes(gridcolor="rgba(255,255,255,0.07)", showline=True, linecolor="rgba(255,255,255,0.25)", linewidth=1, zeroline=False,
                      tickprefix="$")
     return fig
 
