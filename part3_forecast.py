@@ -23,6 +23,35 @@ from scipy import stats
 from config import YEAR_COLORS, PLOTLY_LAYOUT, filter_df
 
 
+def get_forecast_data(raw_df: pd.DataFrame, years: List[int]) -> List[dict]:
+    """Return the 28 Feb 2022 daily predictions as a list of dicts for the API."""
+    df     = filter_df(raw_df, years)
+    annual = df.groupby("Year")["Price"].median().reset_index()
+    if len(annual) >= 2:
+        slope, intercept, *_ = stats.linregress(annual["Year"], annual["Price"])
+    else:
+        slope, intercept = 0.0, float(annual["Price"].iloc[0])
+
+    base_2022    = intercept + slope * 2022
+    overall_mean = raw_df["Price"].mean()
+    seasonal_idx = raw_df.groupby("DayOfYear")["Price"].mean() / overall_mean
+    feb_dates    = pd.date_range("2022-02-01", "2022-02-28")
+    preds        = (base_2022 * seasonal_idx.reindex(feb_dates.dayofyear).values).round(2)
+    fitted       = (intercept + slope * raw_df["Year"]) * seasonal_idx.reindex(raw_df["DayOfYear"].values).values
+    residual_std = float(np.nanstd(raw_df["Price"].values - fitted))
+
+    return [
+        {
+            "date":  d.strftime("%b %d, %Y"),
+            "price": float(p),
+            "low":   round(float(p) - residual_std, 2),
+            "high":  round(float(p) + residual_std, 2),
+        }
+        for d, p in zip(feb_dates, preds)
+        if not np.isnan(p)
+    ]
+
+
 def build_forecast(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
     df     = filter_df(raw_df, years)
     annual = df.groupby("Year")["Price"].median().reset_index()
@@ -36,6 +65,11 @@ def build_forecast(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
     seasonal_idx = raw_df.groupby("DayOfYear")["Price"].mean() / overall_mean
     feb_dates    = pd.date_range("2022-02-01", "2022-02-28")
     preds        = (base_2022 * seasonal_idx.reindex(feb_dates.dayofyear).values).round(2)
+
+    # Residual-based uncertainty band
+    fitted       = (intercept + slope * raw_df["Year"]) * seasonal_idx.reindex(raw_df["DayOfYear"].values).values
+    residual_std = float(np.nanstd(raw_df["Price"].values - fitted))
+
     last2        = sorted(years)[-2:]
     hist         = raw_df[raw_df["Year"].isin(last2)]
 
@@ -51,14 +85,14 @@ def build_forecast(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
             hovertemplate="%{x|%b %d %Y}<br>$%{y}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
         ), row=1, col=1)
 
-    lo_b = preds - 8
-    hi_b = preds + 8
+    lo_b = preds - residual_std
+    hi_b = preds + residual_std
     fig.add_trace(go.Scatter(
         x=list(feb_dates) + list(feb_dates[::-1]),
         y=list(hi_b) + list(lo_b[::-1]),
         fill="toself", fillcolor="rgba(239,159,39,0.15)",
         line=dict(color="rgba(0,0,0,0)"),
-        name="±8 USD band", hoverinfo="skip",
+        name=f"±${residual_std:.1f} band", hoverinfo="skip",
     ), row=1, col=1)
     fig.add_trace(go.Scatter(
         x=feb_dates, y=preds, mode="lines+markers", name="Forecast",

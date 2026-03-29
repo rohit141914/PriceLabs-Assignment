@@ -11,10 +11,11 @@ const CHART_META = {
   zscore:           { num:"6", label:"Z-score over time",         desc:"How far each day's price deviates from the overall mean, measured in standard deviations. The dashed red line is the 2.5 threshold — any point above it is statistically unusual and marked as an outlier.", part:2 },
   histogram:        { num:"7", label:"Price distribution",        desc:"Frequency distribution of all prices split into normal (blue) and outlier (red) bars. The two dashed orange lines are the IQR fences — prices outside these boundaries are considered outliers by the IQR method.", part:2 },
   boxplot:          { num:"8", label:"Box-plots by year",         desc:"Yearly price spread shown as box-and-whisker plots. The box covers the middle 50% of prices, the line inside is the median, and dots outside the whiskers are individual outlier days for that year.", part:2 },
-  forecast:         { num:"9", label:"Feb 2022 forecast",         desc:"Predicts daily hotel prices for February 2022 by combining two signals: a long-term price trend (rising or falling each year) and a seasonal index (how prices typically move day-by-day through the year). The orange line is the forecast, the shaded band is a ±$8 uncertainty range.", part:3 },
+  forecast:         { num:"9", label:"Feb 2022 forecast",         desc:"Predicts daily hotel prices for February 2022 by combining two signals: a long-term price trend (rising or falling each year) and a seasonal index (how prices typically move day-by-day through the year). The orange line is the forecast; the shaded band shows ±1 standard deviation of historical residuals.", part:3 },
 };
 
-const OUTLIER_CHARTS = new Set(["outlier_timeline","zscore","histogram","boxplot"]);
+const OUTLIER_CHARTS  = new Set(["outlier_timeline","zscore","histogram","boxplot"]);
+const FORECAST_CHARTS = new Set(["forecast"]);
 
 // ── Year dropdown ─────────────────────────────────────────────────────────────
 
@@ -123,10 +124,12 @@ function selectChart(btn) {
   document.getElementById("chart-num").textContent   = meta.num;
   document.getElementById("chart-label").textContent = meta.label;
   document.getElementById("chart-desc").textContent  = meta.desc;
-  document.getElementById("outlier-table-card").style.display = OUTLIER_CHARTS.has(currentChart) ? "block" : "none";
-  document.getElementById("forecast-strip").style.display     = currentChart === "forecast" ? "block" : "none";
+  document.getElementById("outlier-table-card").style.display  = OUTLIER_CHARTS.has(currentChart)  ? "block" : "none";
+  document.getElementById("forecast-strip").style.display      = FORECAST_CHARTS.has(currentChart) ? "block" : "none";
+  document.getElementById("forecast-table-card").style.display = FORECAST_CHARTS.has(currentChart) ? "block" : "none";
   loadChart();
   loadOutlierTable();
+  loadForecastTable();
 }
 
 // ── API calls ─────────────────────────────────────────────────────────────────
@@ -216,10 +219,27 @@ async function loadChart() {
   }
 }
 
+async function loadForecastTable() {
+  if (!FORECAST_CHARTS.has(currentChart)) return;
+  try {
+    const res  = await fetch(`/api/forecast?years=${yearsParam()}`);
+    const rows = await res.json();
+    const tbody = document.getElementById("forecast-tbody");
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.date}</td>
+        <td><strong>$${r.price.toFixed(2)}</strong></td>
+        <td>$${r.low.toFixed(2)}</td>
+        <td>$${r.high.toFixed(2)}</td>
+      </tr>`).join("");
+  } catch(e) { console.error(e); }
+}
+
 function refresh() {
   loadStats();
   loadChart();
   loadOutlierTable();
+  loadForecastTable();
 }
 
 // ── Theme toggle ─────────────────────────────────────────────────────────────

@@ -216,6 +216,30 @@
           </div>
         </div>
 
+        <!-- Forecast table (shown only for forecast chart) -->
+        <div class="outlier-section" id="forecast-table-card" style="display:none;">
+          <div class="chart-card-header">
+            <div class="chart-number" style="background:rgba(239,159,39,0.2);color:#EF9F27;">📅</div>
+            <div>
+              <div class="chart-card-title">Feb 2022 — Daily Price Predictions</div>
+              <div class="chart-subtitle">Estimated price for each day using linear trend + seasonal index</div>
+            </div>
+          </div>
+          <div style="overflow-x:auto; max-height:320px; overflow-y:auto;">
+            <table class="outlier-tbl" id="forecast-tbl">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Predicted Price</th>
+                  <th>Low (−1σ)</th>
+                  <th>High (+1σ)</th>
+                </tr>
+              </thead>
+              <tbody id="forecast-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
       </div><!-- /chart-area -->
     </div><!-- /content -->
   </main>

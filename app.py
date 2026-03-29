@@ -19,7 +19,7 @@ from config import filter_df
 from data_loader import load
 from part1_yoy_patterns import build_yoy_overlay, build_monthly_avg, build_heatmap, build_dow
 from part2_outliers import add_outlier_flags, build_outlier_timeline, build_zscore, build_histogram, build_boxplot
-from part3_forecast import build_forecast
+from part3_forecast import build_forecast, get_forecast_data
 
 warnings.filterwarnings("ignore")
 
@@ -96,6 +96,13 @@ async def api_outliers(years: str = Query(default="")):
         }
         for _, r in df.iterrows()
     ]
+
+
+@app.get("/api/forecast")
+async def api_forecast(years: str = Query(default="")):
+    """Return Feb 2022 daily price predictions as a list of dicts."""
+    yr_list = [int(y) for y in years.split(",") if y] if years else ALL_YEARS
+    return get_forecast_data(RAW_DF, yr_list)
 
 
 @app.get("/api/chart/{chart_id}")
