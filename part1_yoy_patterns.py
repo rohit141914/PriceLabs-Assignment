@@ -1,115 +1,98 @@
 """
 part1_yoy_patterns.py
 ──────────────────────
-Exercise Part 1 — Year-over-Year Pattern Visualization
+Part 1 — Year-over-Year Pattern Chart Builders
 
-Charts produced:
-  • yoy_overlay.png      – all years overlaid on a single day-of-year axis
-  • yoy_monthly_box.png  – monthly box-plots per year
-  • yoy_heatmap.png      – avg-price heatmap (Month × Year)
-  • yoy_dow.png          – avg price by day-of-week per year
-
-Usage:
-    python part1_yoy_patterns.py                  # default: hotel_prices.csv
-    python part1_yoy_patterns.py mydata.csv
+Functions:
+    build_yoy_overlay(raw_df, years)  – daily prices overlaid by year
+    build_monthly_avg(raw_df, years)  – average price per month grouped by year
+    build_heatmap(raw_df, years)      – avg-price heatmap (Month × Year)
+    build_dow(raw_df, years)          – avg price by day-of-week per year
 """
 
-import sys
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-import seaborn as sns
-from data_loader import load
+from typing import List
 
-CSV_PATH = sys.argv[1] if len(sys.argv) > 1 else "hotel_prices.csv"
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
 
-COLORS = {
-    2012: "#4E79A7",
-    2013: "#F28E2B",
-    2014: "#E15759",
-    2015: "#76B7B2",
-    2016: "#59A14F",
-}
-
-# ── Load ──────────────────────────────────────────────────────────────────────
-df = load(CSV_PATH)
-years = sorted(df["Year"].unique())
+from config import YEAR_COLORS, PLOTLY_LAYOUT, filter_df
 
 
-# ── Chart 1: Daily price overlaid by year ────────────────────────────────────
-fig, ax = plt.subplots(figsize=(14, 5))
-for yr in years:
-    sub = df[df["Year"] == yr]
-    ax.plot(sub["DayOfYear"], sub["Price"],
-            color=COLORS.get(yr, "grey"), label=str(yr),
-            linewidth=1.2, alpha=0.85)
-ax.set_title("Daily Hotel Price Overlaid by Year  (x = day of year 1–365)")
-ax.set_xlabel("Day of Year")
-ax.set_ylabel("Price (USD)")
-ax.legend(title="Year", loc="upper right")
-ax.grid(axis="y", alpha=0.3)
-plt.tight_layout()
-plt.savefig("yoy_overlay.png", dpi=150, bbox_inches="tight")
-print("📊  Saved → yoy_overlay.png")
-plt.show()
+def build_yoy_overlay(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
+    df  = filter_df(raw_df, years)
+    fig = go.Figure()
+    for yr in years:
+        sub = df[df["Year"] == yr].sort_values("DayOfYear")
+        fig.add_trace(go.Scatter(
+            x=sub["DayOfYear"], y=sub["Price"],
+            mode="lines", name=str(yr),
+            line=dict(color=YEAR_COLORS.get(yr, "#888"), width=1.6),
+            opacity=0.85,
+            hovertemplate=f"<b>{yr}</b>&nbsp;&nbsp;&nbsp;Day %{{x}}<br>Price:&nbsp;&nbsp;$%{{y}}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
+        ))
+    fig.update_layout(**PLOTLY_LAYOUT,
+        title="Daily Price Overlaid by Year",
+        xaxis_title="Day of Year", yaxis_title="Price (USD)",
+        hovermode="x unified")
+    return fig
 
 
-# ── Chart 2: Monthly box-plot per year ───────────────────────────────────────
-df["Month_str"] = df["Month"].apply(lambda m: f"{m:02d}")
-df["Year_str"]  = df["Year"].astype(str)
-
-fig, ax = plt.subplots(figsize=(16, 5))
-sns.boxplot(data=df, x="Month_str", y="Price", hue="Year_str",
-            palette=list(COLORS.values()), ax=ax,
-            linewidth=0.8, fliersize=2)
-ax.set_title("Monthly Price Distribution by Year")
-ax.set_xlabel("Month (01 = Jan … 12 = Dec)")
-ax.set_ylabel("Price (USD)")
-ax.legend(title="Year", loc="upper right", fontsize=8)
-ax.grid(axis="y", alpha=0.3)
-plt.tight_layout()
-plt.savefig("yoy_monthly_box.png", dpi=150, bbox_inches="tight")
-print("📊  Saved → yoy_monthly_box.png")
-plt.show()
-
-
-# ── Chart 3: Heatmap — avg price by Month × Year ─────────────────────────────
-pivot = df.pivot_table(values="Price", index="Month", columns="Year", aggfunc="mean")
-month_labels = ["Jan","Feb","Mar","Apr","May","Jun",
-                "Jul","Aug","Sep","Oct","Nov","Dec"][:len(pivot)]
-pivot.index = month_labels
-
-fig, ax = plt.subplots(figsize=(8, 6))
-sns.heatmap(pivot, annot=True, fmt=".0f", cmap="YlOrRd",
-            linewidths=0.4, ax=ax, cbar_kws={"label": "Avg Price (USD)"})
-ax.set_title("Average Price Heatmap  (Month × Year)")
-ax.set_xlabel("Year")
-ax.set_ylabel("")
-plt.tight_layout()
-plt.savefig("yoy_heatmap.png", dpi=150, bbox_inches="tight")
-print("📊  Saved → yoy_heatmap.png")
-plt.show()
+def build_monthly_avg(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
+    df     = filter_df(raw_df, years)
+    months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+    fig    = go.Figure()
+    for yr in years:
+        sub  = df[df["Year"] == yr]
+        avgs = [sub[sub["Month"] == m+1]["Price"].mean() for m in range(12)]
+        fig.add_trace(go.Bar(
+            x=months, y=[round(v, 1) if not np.isnan(v) else 0 for v in avgs],
+            name=str(yr), marker_color=YEAR_COLORS.get(yr, "#888"), opacity=0.85,
+            hovertemplate=f"<b>{yr}</b>&nbsp;&nbsp;&nbsp;%{{x}}<br>Avg:&nbsp;&nbsp;&nbsp;$%{{y}}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
+        ))
+    fig.update_layout(**PLOTLY_LAYOUT,
+        title="Average Monthly Price by Year",
+        xaxis_title="Month", yaxis_title="Avg Price (USD)", barmode="group")
+    return fig
 
 
-# ── Chart 4: Avg price by day-of-week ────────────────────────────────────────
-dow_labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-dow_avg    = df.groupby(["Year", "DayOfWeek"])["Price"].mean().reset_index()
+def build_heatmap(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
+    df     = filter_df(raw_df, years)
+    months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+    z      = []
+    for m in range(1, 13):
+        row = [round(float(df[(df["Year"]==yr) & (df["Month"]==m)]["Price"].mean()), 1)
+               if len(df[(df["Year"]==yr) & (df["Month"]==m)]) else None
+               for yr in years]
+        z.append(row)
+    fig = go.Figure(go.Heatmap(
+        z=z, x=[str(y) for y in years], y=months,
+        colorscale="YlOrRd",
+        text=[[f"${v}" if v else "" for v in row] for row in z],
+        texttemplate="%{text}",
+        hovertemplate="Year: %{x}&nbsp;&nbsp;&nbsp;Month: %{y}<br>Avg:&nbsp;&nbsp;&nbsp;$%{z}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
+        colorbar=dict(title="USD", tickfont=dict(color="#e2e8f0")),
+    ))
+    fig.update_layout(**PLOTLY_LAYOUT,
+        title="Avg Price Heatmap  (Month × Year)", xaxis_title="Year")
+    return fig
 
-fig, ax = plt.subplots(figsize=(8, 4))
-for yr in years:
-    sub = dow_avg[dow_avg["Year"] == yr]
-    ax.plot(sub["DayOfWeek"], sub["Price"],
-            marker="o", color=COLORS.get(yr, "grey"),
-            label=str(yr), linewidth=1.5)
-ax.set_xticks(range(7))
-ax.set_xticklabels(dow_labels)
-ax.set_title("Average Price by Day of Week")
-ax.set_xlabel("Day of Week")
-ax.set_ylabel("Avg Price (USD)")
-ax.legend(title="Year", fontsize=8)
-ax.grid(axis="y", alpha=0.3)
-plt.tight_layout()
-plt.savefig("yoy_dow.png", dpi=150, bbox_inches="tight")
-print("📊  Saved → yoy_dow.png")
-plt.show()
 
-print("\n✅  Part 1 complete — 4 charts saved.")
+def build_dow(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
+    df         = filter_df(raw_df, years)
+    dow_labels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+    fig        = go.Figure()
+    for yr in years:
+        sub = df[df["Year"]==yr].groupby("DayOfWeek")["Price"].mean().reset_index()
+        fig.add_trace(go.Scatter(
+            x=[dow_labels[d] for d in sub["DayOfWeek"]],
+            y=sub["Price"].round(1),
+            mode="lines+markers", name=str(yr),
+            line=dict(color=YEAR_COLORS.get(yr, "#888"), width=2),
+            marker=dict(size=7),
+            hovertemplate=f"<b>{yr}</b>&nbsp;&nbsp;&nbsp;%{{x}}<br>Avg:&nbsp;&nbsp;&nbsp;$%{{y}}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
+        ))
+    fig.update_layout(**PLOTLY_LAYOUT,
+        title="Avg Price by Day of Week",
+        xaxis_title="Day of Week", yaxis_title="Avg Price (USD)")
+    return fig
