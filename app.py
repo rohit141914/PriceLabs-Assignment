@@ -10,14 +10,13 @@ import sys
 import json
 import warnings
 from pathlib import Path
-import pandas as pd
-
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from config import filter_df
+from data_loader import load
 from part1_yoy_patterns import build_yoy_overlay, build_monthly_avg, build_heatmap, build_dow
 from part2_outliers import add_outlier_flags, build_outlier_timeline, build_zscore, build_histogram, build_boxplot
 from part3_forecast import build_forecast
@@ -33,20 +32,7 @@ app       = FastAPI(title="Hotel Price Analytics", version="1.0.0")
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
 
-# ─── Data loading ─────────────────────────────────────────────────────────────
-def load_data() -> pd.DataFrame:
-    df = pd.read_csv(CSV_PATH, parse_dates=["Date"])
-    df.columns = df.columns.str.strip()
-    df = df.sort_values("Date").reset_index(drop=True)
-    df["Year"]      = df["Date"].dt.year
-    df["Month"]     = df["Date"].dt.month
-    df["DayOfYear"] = df["Date"].dt.dayofyear
-    df["DayOfWeek"] = df["Date"].dt.dayofweek
-    df["MonthName"] = df["Date"].dt.strftime("%b")
-    return df
-
-
-RAW_DF             = load_data()
+RAW_DF             = load(CSV_PATH)
 FULL_DF, LO, HI    = add_outlier_flags(RAW_DF)
 ALL_YEARS: list    = sorted(RAW_DF["Year"].unique().tolist())
 
