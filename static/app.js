@@ -107,6 +107,13 @@ document.addEventListener("click", function(e) {
   if (wrap && !wrap.contains(e.target)) closeYearDropdown();
 });
 
+// ── Accordion sections ────────────────────────────────────────────────────────
+function toggleSection(titleEl) {
+  const body = titleEl.nextElementSibling;
+  const collapsed = body.classList.toggle("collapsed");
+  titleEl.classList.toggle("collapsed", collapsed);
+}
+
 // ── Chart selection ───────────────────────────────────────────────────────────
 function selectChart(btn) {
   document.querySelectorAll(".chart-btn").forEach(b => b.classList.remove("active"));

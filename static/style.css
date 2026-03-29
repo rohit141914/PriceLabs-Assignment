@@ -114,6 +114,34 @@ aside {
   margin-top: 4px;
 }
 
+.accordion-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding-right: 2px;
+}
+.accordion-title:hover { color: var(--text); }
+
+.accordion-arrow {
+  font-size: 8px;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.accordion-title.collapsed .accordion-arrow { transform: rotate(-90deg); }
+
+.accordion-body {
+  overflow: hidden;
+  max-height: 600px;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+  opacity: 1;
+}
+.accordion-body.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
 .chart-btn {
   display: flex;
   align-items: center;

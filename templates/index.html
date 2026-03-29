@@ -61,38 +61,53 @@
         <div class="section-label">Charts</div>
         <div class="chart-group">
 
-          <div class="group-title">Part 1 — YoY Patterns</div>
-          <button class="chart-btn active" data-chart="yoy_overlay" onclick="selectChart(this)">
-            <span class="btn-dot"></span> Day-of-year overlay
-          </button>
-          <button class="chart-btn" data-chart="monthly_avg" onclick="selectChart(this)">
-            <span class="btn-dot"></span> Monthly averages
-          </button>
-          <button class="chart-btn" data-chart="heatmap" onclick="selectChart(this)">
-            <span class="btn-dot"></span> Month × Year heatmap
-          </button>
-          <button class="chart-btn" data-chart="dow" onclick="selectChart(this)">
-            <span class="btn-dot"></span> Day-of-week pattern
-          </button>
+          <div class="group-title accordion-title" onclick="toggleSection(this)">
+            <span>Part 1 — YoY Patterns</span>
+            <span class="accordion-arrow">&#9660;</span>
+          </div>
+          <div class="accordion-body">
+            <button class="chart-btn active" data-chart="yoy_overlay" onclick="selectChart(this)">
+              <span class="btn-dot"></span> Day-of-year overlay
+            </button>
+            <button class="chart-btn" data-chart="monthly_avg" onclick="selectChart(this)">
+              <span class="btn-dot"></span> Monthly averages
+            </button>
+            <button class="chart-btn" data-chart="heatmap" onclick="selectChart(this)">
+              <span class="btn-dot"></span> Month × Year heatmap
+            </button>
+            <button class="chart-btn" data-chart="dow" onclick="selectChart(this)">
+              <span class="btn-dot"></span> Day-of-week pattern
+            </button>
+          </div>
 
-          <div class="group-title">Part 2 — Outlier Detection</div>
-          <button class="chart-btn" data-chart="outlier_timeline" onclick="selectChart(this)">
-            <span class="btn-dot"></span> Timeline with outliers
-          </button>
-          <button class="chart-btn" data-chart="zscore" onclick="selectChart(this)">
-            <span class="btn-dot"></span> Z-score over time
-          </button>
-          <button class="chart-btn" data-chart="histogram" onclick="selectChart(this)">
-            <span class="btn-dot"></span> Price distribution
-          </button>
-          <button class="chart-btn" data-chart="boxplot" onclick="selectChart(this)">
-            <span class="btn-dot"></span> Box-plots by year
-          </button>
+          <div class="group-title accordion-title" onclick="toggleSection(this)">
+            <span>Part 2 — Outlier Detection</span>
+            <span class="accordion-arrow">&#9660;</span>
+          </div>
+          <div class="accordion-body">
+            <button class="chart-btn" data-chart="outlier_timeline" onclick="selectChart(this)">
+              <span class="btn-dot"></span> Timeline with outliers
+            </button>
+            <button class="chart-btn" data-chart="zscore" onclick="selectChart(this)">
+              <span class="btn-dot"></span> Z-score over time
+            </button>
+            <button class="chart-btn" data-chart="histogram" onclick="selectChart(this)">
+              <span class="btn-dot"></span> Price distribution
+            </button>
+            <button class="chart-btn" data-chart="boxplot" onclick="selectChart(this)">
+              <span class="btn-dot"></span> Box-plots by year
+            </button>
+          </div>
 
-          <div class="group-title">Part 3 — Bonus Forecast</div>
-          <button class="chart-btn" data-chart="forecast" onclick="selectChart(this)">
-            <span class="btn-dot"></span> Feb 2022 forecast
-          </button>
+          <div class="group-title accordion-title" onclick="toggleSection(this)">
+            <span>Part 3 — Bonus Forecast</span>
+            <span class="accordion-arrow">&#9660;</span>
+          </div>
+          <div class="accordion-body">
+            <button class="chart-btn" data-chart="forecast" onclick="selectChart(this)">
+              <span class="btn-dot"></span> Feb 2022 forecast
+            </button>
+          </div>
 
         </div>
       </div>
