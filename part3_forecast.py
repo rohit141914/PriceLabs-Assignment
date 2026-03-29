@@ -73,9 +73,9 @@ def build_forecast(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
     last2        = sorted(years)[-2:]
     hist         = raw_df[raw_df["Year"].isin(last2)]
 
-    fig = make_subplots(rows=2, cols=1, row_heights=[0.55, 0.45],
+    fig = make_subplots(rows=2, cols=1,
         subplot_titles=("Historical + Feb 2022 Forecast", "Feb 2022 — Daily Forecast"),
-        vertical_spacing=0.14)
+        vertical_spacing=0.01)
 
     for yr in last2:
         sub = hist[hist["Year"] == yr].sort_values("Date")
@@ -106,9 +106,25 @@ def build_forecast(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
         name="Daily forecast", showlegend=False,
     ), row=2, col=1)
 
-    fig.update_layout(**PLOTLY_LAYOUT,
-        title=f"Feb 2022 Forecast  (trend slope: {slope:+.2f} USD/yr)",
-        hovermode="x unified")
+    fig.update_layout(
+        yaxis =dict(domain=[0.52, 0.90]),
+        yaxis2=dict(domain=[0.00, 0.36]),
+    )
+
+    anns = list(fig.layout.annotations)
+    if len(anns) >= 2:
+        anns[0].update(y=0.91, yanchor="bottom")
+        anns[1].update(y=0.37, yanchor="bottom")
+        fig.update_layout(annotations=anns)
+
+    _layout = {
+        **PLOTLY_LAYOUT,
+        "title": dict(text=f"Feb 2022 Forecast  (trend slope: {slope:+.2f} USD/yr)"),
+        "margin": dict(t=80, b=50, l=60, r=40),
+        "hovermode": "x unified",
+    }
+    fig.update_layout(**_layout)
+
     fig.update_xaxes(gridcolor="rgba(255,255,255,0.07)", showline=True,
                      linecolor="rgba(255,255,255,0.25)", linewidth=1, zeroline=False)
     fig.update_yaxes(gridcolor="rgba(255,255,255,0.07)", showline=True,
