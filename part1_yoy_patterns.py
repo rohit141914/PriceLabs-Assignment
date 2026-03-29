@@ -4,10 +4,12 @@ part1_yoy_patterns.py
 Part 1 — Year-over-Year Pattern Chart Builders
 
 Functions:
-    build_yoy_overlay(raw_df, years)  – daily prices overlaid by year
-    build_monthly_avg(raw_df, years)  – average price per month grouped by year
-    build_heatmap(raw_df, years)      – avg-price heatmap (Month × Year)
-    build_dow(raw_df, years)          – avg price by day-of-week per year
+    build_yoy_overlay(raw_df, years)   – daily prices overlaid by year
+    build_monthly_avg(raw_df, years)   – average price per month grouped by year
+    build_heatmap(raw_df, years)       – avg-price heatmap (Month × Year)
+    build_dow(raw_df, years)           – avg price by day-of-week per year
+    build_year_to_year(raw_df, years)  – annual avg price + YoY % change
+    build_quarterly(raw_df, years)     – avg price by quarter (Q1–Q4) per year
 """
 
 from typing import List
@@ -15,6 +17,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from config import YEAR_COLORS, PLOTLY_LAYOUT, filter_df
 
@@ -95,4 +98,76 @@ def build_dow(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
     fig.update_layout(**PLOTLY_LAYOUT,
         title="Avg Price by Day of Week",
         xaxis_title="Day of Week", yaxis_title="Avg Price (USD)")
+    return fig
+
+
+def build_year_to_year(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
+    df   = filter_df(raw_df, years)
+    avgs = {yr: round(float(df[df["Year"] == yr]["Price"].mean()), 1) for yr in years}
+
+    pct_changes = {}
+    sorted_yrs  = sorted(years)
+    for i, yr in enumerate(sorted_yrs):
+        if i == 0:
+            pct_changes[yr] = None
+        else:
+            prev = avgs[sorted_yrs[i - 1]]
+            pct_changes[yr] = round((avgs[yr] - prev) / prev * 100, 2)
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(go.Bar(
+        x=[str(y) for y in sorted_yrs],
+        y=[avgs[y] for y in sorted_yrs],
+        name="Avg Price",
+        marker_color=[YEAR_COLORS.get(y, "#888") for y in sorted_yrs],
+        opacity=0.85,
+        hovertemplate="<b>%{x}</b><br>Avg Price:&nbsp;&nbsp;$%{y}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
+    ), secondary_y=False)
+
+    pct_x = [str(y) for y in sorted_yrs if pct_changes[y] is not None]
+    pct_y = [pct_changes[y] for y in sorted_yrs if pct_changes[y] is not None]
+    fig.add_trace(go.Scatter(
+        x=pct_x, y=pct_y,
+        name="YoY % Change",
+        mode="lines+markers+text",
+        line=dict(color="#e2e8f0", width=2, dash="dot"),
+        marker=dict(size=8, color="#e2e8f0"),
+        text=[f"{v:+.1f}%" for v in pct_y],
+        textposition="top center",
+        textfont=dict(color="#e2e8f0", size=11),
+        hovertemplate="<b>%{x}</b><br>YoY Change:&nbsp;&nbsp;%{y:.2f}%&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
+    ), secondary_y=True)
+
+    layout = {**PLOTLY_LAYOUT,
+        "title": "Year-to-Year Annual Price Trend", 
+        "xaxis_title": "Year",
+        "yaxis_title": "Avg Price (USD)",
+        "yaxis2": dict(title="YoY % Change", ticksuffix="%",
+                       gridcolor="rgba(255,255,255,0.05)",
+                       tickfont=dict(color="#e2e8f0")),
+        "barmode": "group",
+    }
+    fig.update_layout(**layout)
+    return fig
+
+
+def build_quarterly(raw_df: pd.DataFrame, years: List[int]) -> go.Figure:
+    df = filter_df(raw_df, years)
+    quarter_map = {1:1,2:1,3:1, 4:2,5:2,6:2, 7:3,8:3,9:3, 10:4,11:4,12:4}
+    df = df.copy()
+    df["Quarter"] = df["Month"].map(quarter_map)
+    quarters = ["Q1","Q2","Q3","Q4"]
+    fig = go.Figure()
+    for yr in years:
+        sub  = df[df["Year"] == yr]
+        avgs = [sub[sub["Quarter"] == q]["Price"].mean() for q in range(1, 5)]
+        fig.add_trace(go.Bar(
+            x=quarters, y=[round(v, 1) if not np.isnan(v) else 0 for v in avgs],
+            name=str(yr), marker_color=YEAR_COLORS.get(yr, "#888"), opacity=0.85,
+            hovertemplate=f"<b>{yr}</b>&nbsp;&nbsp;&nbsp;%{{x}}<br>Avg:&nbsp;&nbsp;&nbsp;$%{{y}}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
+        ))
+    fig.update_layout(**PLOTLY_LAYOUT,
+        title="Average Quarterly Price by Year",
+        xaxis_title="Quarter", yaxis_title="Avg Price (USD)", barmode="group")
     return fig

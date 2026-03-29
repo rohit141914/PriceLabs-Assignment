@@ -17,7 +17,7 @@ from fastapi.templating import Jinja2Templates
 
 from config import filter_df
 from data_loader import load
-from part1_yoy_patterns import build_yoy_overlay, build_monthly_avg, build_heatmap, build_dow
+from part1_yoy_patterns import build_yoy_overlay, build_monthly_avg, build_heatmap, build_dow, build_year_to_year, build_quarterly
 from part2_outliers import add_outlier_flags, build_outlier_timeline, build_zscore, build_histogram, build_boxplot
 from part3_forecast import build_forecast, get_forecast_data
 
@@ -47,6 +47,8 @@ CHART_MAP = {
     "monthly_avg":      lambda years: build_monthly_avg(RAW_DF, years),
     "heatmap":          lambda years: build_heatmap(RAW_DF, years),
     "dow":              lambda years: build_dow(RAW_DF, years),
+    "year_to_year":     lambda years: build_year_to_year(RAW_DF, years),
+    "quarterly":        lambda years: build_quarterly(RAW_DF, years),
     "outlier_timeline": lambda years: build_outlier_timeline(FULL_DF, years),
     "zscore":           lambda years: build_zscore(FULL_DF, years),
     "histogram":        lambda years: build_histogram(FULL_DF, years, LO, HI),
