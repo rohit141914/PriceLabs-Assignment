@@ -51,6 +51,13 @@ PLOTLY_LAYOUT = dict(
     ),
     xaxis=dict(gridcolor="rgba(255,255,255,0.07)", showline=False, zeroline=False),
     yaxis=dict(gridcolor="rgba(255,255,255,0.07)", showline=False, zeroline=False),
+    hoverlabel=dict(
+        bgcolor="#1e2530",
+        bordercolor="rgba(255,255,255,0.15)",
+        font=dict(family="DM Sans, sans-serif", color="#e2e8f0", size=13),
+        namelength=-1,
+        align="left",
+    ),
 )
 
 # ─── FastAPI app + templates ──────────────────────────────────────────────────
@@ -112,7 +119,7 @@ def build_yoy_overlay(years: List[int]) -> go.Figure:
             mode="lines", name=str(yr),
             line=dict(color=YEAR_COLORS.get(yr, "#888"), width=1.6),
             opacity=0.85,
-            hovertemplate=f"<b>{yr}</b>  Day %{{x}}<br>Price: $%{{y}}<extra></extra>",
+            hovertemplate=f"<b>{yr}</b>&nbsp;&nbsp;&nbsp;Day %{{x}}<br>Price:&nbsp;&nbsp;$%{{y}}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
         ))
     fig.update_layout(**PLOTLY_LAYOUT,
         title="Daily Price Overlaid by Year",
@@ -131,7 +138,7 @@ def build_monthly_avg(years: List[int]) -> go.Figure:
         fig.add_trace(go.Bar(
             x=months, y=[round(v, 1) if not np.isnan(v) else 0 for v in avgs],
             name=str(yr), marker_color=YEAR_COLORS.get(yr, "#888"), opacity=0.85,
-            hovertemplate=f"<b>{yr}</b>  %{{x}}<br>Avg: $%{{y}}<extra></extra>",
+            hovertemplate=f"<b>{yr}</b>&nbsp;&nbsp;&nbsp;%{{x}}<br>Avg:&nbsp;&nbsp;&nbsp;$%{{y}}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
         ))
     fig.update_layout(**PLOTLY_LAYOUT,
         title="Average Monthly Price by Year",
@@ -153,7 +160,7 @@ def build_heatmap(years: List[int]) -> go.Figure:
         colorscale="YlOrRd",
         text=[[f"${v}" if v else "" for v in row] for row in z],
         texttemplate="%{text}",
-        hovertemplate="Year: %{x}  Month: %{y}<br>Avg: $%{z}<extra></extra>",
+        hovertemplate="Year: %{x}&nbsp;&nbsp;&nbsp;Month: %{y}<br>Avg:&nbsp;&nbsp;&nbsp;$%{z}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
         colorbar=dict(title="USD", tickfont=dict(color="#e2e8f0")),
     ))
     fig.update_layout(**PLOTLY_LAYOUT,
@@ -173,7 +180,7 @@ def build_dow(years: List[int]) -> go.Figure:
             mode="lines+markers", name=str(yr),
             line=dict(color=YEAR_COLORS.get(yr, "#888"), width=2),
             marker=dict(size=7),
-            hovertemplate=f"<b>{yr}</b>  %{{x}}<br>Avg: $%{{y}}<extra></extra>",
+            hovertemplate=f"<b>{yr}</b>&nbsp;&nbsp;&nbsp;%{{x}}<br>Avg:&nbsp;&nbsp;&nbsp;$%{{y}}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
         ))
     fig.update_layout(**PLOTLY_LAYOUT,
         title="Avg Price by Day of Week",
@@ -189,13 +196,13 @@ def build_outlier_timeline(years: List[int]) -> go.Figure:
     fig.add_trace(go.Scatter(
         x=normal["Date"], y=normal["Price"], mode="lines", name="Normal",
         line=dict(color="#4E79A7", width=1), opacity=0.7,
-        hovertemplate="%{x|%b %d %Y}<br>$%{y}<extra>Normal</extra>",
+        hovertemplate="%{x|%b %d %Y}<br>$%{y}&nbsp;&nbsp;&nbsp;&nbsp;<extra>Normal</extra>",
     ))
     fig.add_trace(go.Scatter(
         x=outlier["Date"], y=outlier["Price"], mode="markers",
         name=f"Outlier ({len(outlier)})",
         marker=dict(color="#E15759", size=8, line=dict(color="white", width=1)),
-        hovertemplate="%{x|%b %d %Y}<br>$%{y}<extra>OUTLIER</extra>",
+        hovertemplate="%{x|%b %d %Y}<br>$%{y}&nbsp;&nbsp;&nbsp;&nbsp;<extra>OUTLIER</extra>",
     ))
     fig.update_layout(**PLOTLY_LAYOUT,
         title="Price Over Time — Outliers Highlighted",
@@ -210,7 +217,7 @@ def build_zscore(years: List[int]) -> go.Figure:
     fig.add_trace(go.Scatter(
         x=df["Date"], y=df["z_score"].round(3), mode="lines", name="|Z-score|",
         line=dict(color="#76B7B2", width=1),
-        hovertemplate="%{x|%b %d %Y}<br>|Z| = %{y}<extra></extra>",
+        hovertemplate="%{x|%b %d %Y}<br>|Z| =&nbsp;&nbsp;%{y}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
     ))
     fig.add_hline(y=Z_THRESHOLD,
         line=dict(color="#E15759", dash="dash", width=1.5),
@@ -219,7 +226,7 @@ def build_zscore(years: List[int]) -> go.Figure:
     fig.add_trace(go.Scatter(
         x=outlier["Date"], y=outlier["z_score"].round(3), mode="markers",
         name="Outlier", marker=dict(color="#E15759", size=8),
-        hovertemplate="%{x|%b %d %Y}<br>|Z| = %{y}<extra>OUTLIER</extra>",
+        hovertemplate="%{x|%b %d %Y}<br>|Z| =&nbsp;&nbsp;%{y}&nbsp;&nbsp;&nbsp;&nbsp;<extra>OUTLIER</extra>",
     ))
     fig.update_layout(**PLOTLY_LAYOUT,
         title="Z-score Over Time", xaxis_title="Date", yaxis_title="|Z-score|")
@@ -255,7 +262,7 @@ def build_boxplot(years: List[int]) -> go.Figure:
         fig.add_trace(go.Box(
             y=sub["Price"], name=str(yr),
             marker_color=YEAR_COLORS.get(yr, "#888"), boxmean=True,
-            hovertemplate=f"<b>{yr}</b><br>%{{y}}<extra></extra>",
+            hovertemplate=f"<b>{yr}</b><br>$%{{y}}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
         ))
     fig.update_layout(**PLOTLY_LAYOUT,
         title="Price Box-Plots by Year",
@@ -287,7 +294,7 @@ def build_forecast(years: List[int]) -> go.Figure:
         fig.add_trace(go.Scatter(
             x=sub["Date"], y=sub["Price"], mode="lines", name=str(yr),
             line=dict(color=YEAR_COLORS.get(yr, "#888"), width=1), opacity=0.7,
-            hovertemplate="%{x|%b %d %Y}<br>$%{y}<extra></extra>",
+            hovertemplate="%{x|%b %d %Y}<br>$%{y}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
         ), row=1, col=1)
 
     lo_b = preds - 8
@@ -302,12 +309,12 @@ def build_forecast(years: List[int]) -> go.Figure:
     fig.add_trace(go.Scatter(
         x=feb_dates, y=preds, mode="lines+markers", name="Forecast",
         line=dict(color="#EF9F27", width=2.5), marker=dict(size=5),
-        hovertemplate="%{x|%b %d}<br>Forecast: $%{y}<extra></extra>",
+        hovertemplate="%{x|%b %d}<br>Forecast:&nbsp;&nbsp;$%{y}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
     ), row=1, col=1)
     fig.add_trace(go.Bar(
         x=[d.strftime("Feb %d") for d in feb_dates], y=preds,
         marker=dict(color=preds, colorscale="YlOrRd", showscale=False),
-        hovertemplate="%{x}<br>$%{y}<extra></extra>",
+        hovertemplate="%{x}<br>$%{y}&nbsp;&nbsp;&nbsp;&nbsp;<extra></extra>",
         name="Daily forecast", showlegend=False,
     ), row=2, col=1)
 
