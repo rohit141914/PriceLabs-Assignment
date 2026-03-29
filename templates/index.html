@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Price Analytics</title>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🏨</div>
+      Hotel Price Analytics
+    </div>
+    <div class="header-divider"></div>
+    <span class="tag">2012 – 2016</span>
+  </header>
+
+  <main>
+    <!-- Sidebar -->
+    <aside>
+
+      <!-- Year multiselect -->
+      <div>
+        <div class="section-label">Filter by Year</div>
+        <div class="year-grid" id="yearGrid">
+          {% for yr in years %}
+          <div class="year-chip selected" data-year="{{ yr }}" onclick="toggleYear(this)">{{ yr }}</div>
+          {% endfor %}
+        </div>
+        <button class="select-all-btn" onclick="selectAllYears()">Select / Deselect All</button>
+      </div>
+
+      <!-- Chart selector -->
+      <div>
+        <div class="section-label">Charts</div>
+        <div class="chart-group">
+
+          <div class="group-title">Part 1 — YoY Patterns</div>
+          <button class="chart-btn active" data-chart="yoy_overlay" onclick="selectChart(this)">
+            <span class="btn-dot"></span> Day-of-year overlay
+          </button>
+          <button class="chart-btn" data-chart="monthly_avg" onclick="selectChart(this)">
+            <span class="btn-dot"></span> Monthly averages
+          </button>
+          <button class="chart-btn" data-chart="heatmap" onclick="selectChart(this)">
+            <span class="btn-dot"></span> Month × Year heatmap
+          </button>
+          <button class="chart-btn" data-chart="dow" onclick="selectChart(this)">
+            <span class="btn-dot"></span> Day-of-week pattern
+          </button>
+
+          <div class="group-title">Part 2 — Outlier Detection</div>
+          <button class="chart-btn" data-chart="outlier_timeline" onclick="selectChart(this)">
+            <span class="btn-dot"></span> Timeline with outliers
+          </button>
+          <button class="chart-btn" data-chart="zscore" onclick="selectChart(this)">
+            <span class="btn-dot"></span> Z-score over time
+          </button>
+          <button class="chart-btn" data-chart="histogram" onclick="selectChart(this)">
+            <span class="btn-dot"></span> Price distribution
+          </button>
+          <button class="chart-btn" data-chart="boxplot" onclick="selectChart(this)">
+            <span class="btn-dot"></span> Box-plots by year
+          </button>
+
+          <div class="group-title">Part 3 — Bonus Forecast</div>
+          <button class="chart-btn" data-chart="forecast" onclick="selectChart(this)">
+            <span class="btn-dot"></span> Feb 2022 forecast
+          </button>
+
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Main content -->
+    <div class="content">
+
+      <!-- Metric cards -->
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Total Days</div>
+          <div class="metric-val" id="m-days">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Avg Price</div>
+          <div class="metric-val accent" id="m-avg">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Min Price</div>
+          <div class="metric-val" id="m-min">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Max Price</div>
+          <div class="metric-val" id="m-max">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Outliers</div>
+          <div class="metric-val danger" id="m-out">—</div>
+        </div>
+      </div>
+
+      <!-- Chart area -->
+      <div class="chart-area">
+
+        <!-- Primary chart card -->
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-number" id="chart-num">1</div>
+            <div>
+              <div class="chart-card-title" id="chart-label">Day-of-year overlay</div>
+              <div class="chart-subtitle" id="chart-desc">All years overlaid on a single day-of-year axis to reveal seasonal patterns</div>
+            </div>
+          </div>
+          <div class="chart-body" style="position:relative;">
+            <div class="loader" id="loader">
+              <div class="spinner"></div>
+              <span style="font-size:12px;color:var(--muted);">Loading chart…</span>
+            </div>
+            <div id="plot-container">
+              <div id="plotly-chart" class="plot-inner"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outlier table (shown only for outlier charts) -->
+        <div class="outlier-section" id="outlier-table-card" style="display:none;">
+          <div class="chart-card-header">
+            <div class="chart-number" style="background:rgba(225,87,89,0.2);color:var(--danger);">!</div>
+            <div>
+              <div class="chart-card-title">Detected Outliers</div>
+              <div class="chart-subtitle">Confirmed by ≥ 2 of 3 detection methods</div>
+            </div>
+          </div>
+          <div style="overflow-x:auto; max-height:280px; overflow-y:auto;">
+            <table class="outlier-tbl" id="outlier-tbl">
+              <thead>
+                <tr>
+                  <th>Date</th><th>Price</th><th>|Z-score|</th>
+                  <th>Z-flag</th><th>IQR-flag</th><th>Year-Z flag</th>
+                </tr>
+              </thead>
+              <tbody id="outlier-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Forecast info strip -->
+        <div id="forecast-strip" style="display:none;">
+          <div class="info-strip">
+            <div class="info-pill">Method <strong>Linear trend + seasonal index</strong></div>
+            <div class="info-pill">Trend <strong id="slope-val">—</strong> USD / year</div>
+            <div class="info-pill">2022 base price <strong id="base-val">—</strong></div>
+            <div class="info-pill">Tip: install <strong>prophet</strong> for a better model</div>
+          </div>
+        </div>
+
+      </div><!-- /chart-area -->
+    </div><!-- /content -->
+  </main>
+</div>
+
+<script>const ALL_YEARS = {{ years | tojson }};</script>
+<script src="/static/app.js"></script>
+</body>
+</html>
