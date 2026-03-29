@@ -17,6 +17,35 @@
   --radius-lg: 16px;
 }
 
+/* ── Light theme overrides ── */
+[data-theme="light"] {
+  --bg:       #f4f6f9;
+  --surface:  #ffffff;
+  --surface2: #eef1f5;
+  --border:   rgba(0,0,0,0.09);
+  --border2:  rgba(0,0,0,0.15);
+  --text:     #1a202c;
+  --muted:    #64748b;
+}
+
+/* theme toggle button */
+.theme-toggle {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 16px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.theme-toggle:hover { background: var(--border2); }
+
 html, body { height: 100%; }
 
 body {

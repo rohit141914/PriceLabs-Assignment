@@ -162,13 +162,40 @@ async function loadOutlierTable() {
   } catch(e) { console.error(e); }
 }
 
+function plotlyThemeLayout() {
+  const light = document.documentElement.getAttribute("data-theme") === "light";
+  const fontColor   = light ? "#1a202c" : "#e2e8f0";
+  const gridColor   = light ? "rgba(0,0,0,0.08)"  : "rgba(255,255,255,0.07)";
+  const lineColor   = light ? "rgba(0,0,0,0.25)"  : "rgba(255,255,255,0.25)";
+  const hoverBg     = light ? "#ffffff"            : "#1e2530";
+  const hoverBorder = light ? "rgba(0,0,0,0.15)"  : "rgba(255,255,255,0.15)";
+  const legendBg    = light ? "rgba(0,0,0,0.04)"  : "rgba(255,255,255,0.05)";
+  const legendBorder= light ? "rgba(0,0,0,0.1)"   : "rgba(255,255,255,0.1)";
+  const axisObj = { gridcolor: gridColor, linecolor: lineColor };
+  return {
+    font:       { color: fontColor },
+    xaxis:      axisObj,
+    yaxis:      axisObj,
+    legend:     { bgcolor: legendBg, bordercolor: legendBorder },
+    hoverlabel: { bgcolor: hoverBg, bordercolor: hoverBorder, font: { color: fontColor } },
+  };
+}
+
 async function loadChart() {
   const loader = document.getElementById("loader");
   loader.classList.add("show");
   try {
     const res  = await fetch(`/api/chart/${currentChart}?years=${yearsParam()}`);
     const fig  = await res.json();
-    Plotly.react("plotly-chart", fig.data, fig.layout, {
+    const theme  = plotlyThemeLayout();
+    const layout = Object.assign({}, fig.layout, {
+      font:       Object.assign({}, fig.layout.font,   theme.font),
+      xaxis:      Object.assign({}, fig.layout.xaxis,  theme.xaxis),
+      yaxis:      Object.assign({}, fig.layout.yaxis,  theme.yaxis),
+      legend:     Object.assign({}, fig.layout.legend, theme.legend),
+      hoverlabel: Object.assign({}, fig.layout.hoverlabel, theme.hoverlabel),
+    });
+    Plotly.react("plotly-chart", fig.data, layout, {
       responsive: true,
       displayModeBar: true,
       modeBarButtonsToRemove: ["autoScale2d","lasso2d","select2d"],
@@ -194,6 +221,29 @@ function refresh() {
   loadChart();
   loadOutlierTable();
 }
+
+// ── Theme toggle ─────────────────────────────────────────────────────────────
+(function() {
+  const btn = document.getElementById("themeToggle");
+  const saved = localStorage.getItem("theme") || "dark";
+  if (saved === "light") {
+    document.documentElement.setAttribute("data-theme", "light");
+    btn.textContent = "☀️";
+  }
+  btn.addEventListener("click", () => {
+    const isLight = document.documentElement.getAttribute("data-theme") === "light";
+    if (isLight) {
+      document.documentElement.removeAttribute("data-theme");
+      btn.textContent = "🌙";
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+      btn.textContent = "☀️";
+      localStorage.setItem("theme", "light");
+    }
+    Plotly.relayout("plotly-chart", plotlyThemeLayout());
+  });
+})();
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener("load", () => {
